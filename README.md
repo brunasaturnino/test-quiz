@@ -137,3 +137,5 @@ Com os testes passando, faça o commit com a seguinte mensagem: `Commit 3: Testi
 ---
 
 Repositório configurado para executar os testes localmente e no GitHub Actions.
+
+Execução local: `pytest -v tests.py`, com 18 testes passando.
