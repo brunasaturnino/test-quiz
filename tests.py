@@ -34,3 +34,64 @@ def test_create_choice():
     assert len(question.choices) == 1
     assert choice.text == 'a'
     assert not choice.is_correct
+
+def test_accepts_title_with_maximum_length():
+    title = 'a' * 200
+    question = Question(title=title)
+    assert question.title == title
+
+def test_rejects_points_outside_valid_range():
+    with pytest.raises(Exception, match='Points must be between 1 and 100'):
+        Question(title='q1', points=0)
+    with pytest.raises(Exception, match='Points must be between 1 and 100'):
+        Question(title='q1', points=101)
+
+def test_new_question_starts_without_choices():
+    question = Question(title='q1')
+    assert question.choices == []
+
+def test_added_choices_receive_sequential_ids():
+    question = Question(title='q1')
+    first = question.add_choice('a')
+    second = question.add_choice('b')
+    assert first.id == 1
+    assert second.id == 2
+
+def test_rejects_empty_choice_text():
+    question = Question(title='q1')
+    with pytest.raises(Exception, match='Text cannot be empty'):
+        question.add_choice('')
+
+def test_rejects_choice_text_longer_than_100_characters():
+    question = Question(title='q1')
+    with pytest.raises(Exception, match='Text cannot be longer than 100 characters'):
+        question.add_choice('a' * 101)
+
+def test_remove_choice_by_id_keeps_the_others():
+    question = Question(title='q1')
+    question.add_choice('a')
+    question.add_choice('b')
+    question.add_choice('c')
+    question.remove_choice_by_id(2)
+    assert [choice.text for choice in question.choices] == ['a', 'c']
+
+def test_remove_choice_by_id_rejects_unknown_id():
+    question = Question(title='q1')
+    question.add_choice('a')
+    with pytest.raises(Exception, match='Invalid choice id 5'):
+        question.remove_choice_by_id(5)
+
+def test_remove_all_choices_clears_every_choice():
+    question = Question(title='q1')
+    question.add_choice('a')
+    question.add_choice('b')
+    question.remove_all_choices()
+    assert question.choices == []
+
+def test_set_correct_choices_marks_only_the_given_ids():
+    question = Question(title='q1')
+    question.add_choice('a')
+    question.add_choice('b')
+    question.add_choice('c')
+    question.set_correct_choices([1, 3])
+    assert [choice.is_correct for choice in question.choices] == [True, False, True]
